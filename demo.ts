@@ -1,9 +1,13 @@
 function setupDemo2(imagePath: string)
 {
-    // Setup canvas
-    let canvas = <HTMLCanvasElement>document.getElementById('canvas');
+    // Setup form
     let endpointsInput = <HTMLInputElement>document.getElementById('endpoints');
     let countInput = <HTMLInputElement>document.getElementById('count');
+    let countSpan = <HTMLElement>document.getElementById('countSpan');
+    endpointsInput.onchange = () => redraw();
+    countInput.oninput = () => { redraw(); return false;}
+    // Setup canvas
+    let canvas = <HTMLCanvasElement>document.getElementById('canvas');
     let ctx = canvas.getContext("2d");
     let loadCount = 0;
     function onLoadOne() {
@@ -52,7 +56,7 @@ function setupDemo2(imagePath: string)
     {
         let count = countInput.valueAsNumber;
         let endpoints = endpointsInput.checked;
-        countInput.hidden = endpoints;
+        countSpan.hidden = endpoints;
 
         // Recompute path
         let walkable: boolean[][] = [];
