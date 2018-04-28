@@ -77,15 +77,16 @@ function findArticulationPoints(width: number, height: number, walkable: boolean
     return isArticulation;
 }
 
-function chooseRandom(weights: number[]): number | null 
+function chooseRandom(weights: number[], random?: () => number): number | null 
 {
+    random = random || Math.random
     let totalWeight = 0;
     for (let i=0; i < weights.length; i++) {
         totalWeight += weights[i]
     }
     if (totalWeight <= 0)
         return null;
-    let r = Math.random() * totalWeight;
+    let r = random() * totalWeight;
     // Could do binary search here
     for (let i=0; i < weights.length; i++) {
         r -= weights[i]
@@ -96,7 +97,7 @@ function chooseRandom(weights: number[]): number | null
     throw new Error("Failed to choose a random point")
 }
 
-function chooseRandomPoint(width: number, height: number, weights: number[][]): [number, number] | null
+function chooseRandomPoint(width: number, height: number, weights: number[][], random?: () => number): [number, number] | null
 {
     let linearWeights = [];
     for (let x=0; x < width; x++) {
@@ -104,7 +105,7 @@ function chooseRandomPoint(width: number, height: number, weights: number[][]): 
             linearWeights.push(weights[x][y]);
         }
     }
-    let i = chooseRandom(linearWeights);
+    let i = chooseRandom(linearWeights, random);
     if (i === null)
         return null;
     return [Math.floor(i / height), i % height];
@@ -134,7 +135,7 @@ function zipMap2D<U, V, R>(width: number, height: number, values1: U[][], values
 /**
  * Returns a random minimal subset of walkable that is a connected set containing all of points.
  */
-function randomPath(width: number, height: number, walkable: boolean[][], points: boolean[][]): boolean[][]
+function randomPath(width: number, height: number, walkable: boolean[][], points: boolean[][], random?: () => number): boolean[][]
 {
     let path: boolean[][] = [];
     for (let x=0; x < width; x++) {
@@ -145,8 +146,8 @@ function randomPath(width: number, height: number, walkable: boolean[][], points
     }
     while(true) {
         let artPoints = findArticulationPoints(width, height, path, points);
-        let weights = zipMap2D(width, height, path, artPoints, (isPath, isArtPoint) => path && !isArtPoint ? 1.0 : 0.0);
-        let chiselPoint = chooseRandomPoint(width, height, weights)
+        let weights = zipMap2D(width, height, path, artPoints, (isPath, isArtPoint) => isPath && !isArtPoint ? 1.0 : 0.0);
+        let chiselPoint = chooseRandomPoint(width, height, weights, random);
         if (chiselPoint === null) {
             break;
         }else{
@@ -160,7 +161,7 @@ function randomPath(width: number, height: number, walkable: boolean[][], points
 /**
  * Returns a random connected subset of walkable with the given size.
  */
-function randomConnectedSet(width: number, height: number, walkable: boolean[][], count: number)
+function randomConnectedSet(width: number, height: number, walkable: boolean[][], count: number, random?: () => number)
 {
     let set: boolean[][] = [];
     let setCount = 0;
@@ -174,7 +175,7 @@ function randomConnectedSet(width: number, height: number, walkable: boolean[][]
     while(setCount > count) {
         let artPoints = findArticulationPoints(width, height, set);
         let weights = zipMap2D(width, height, set, artPoints, (inSet, isArtPoint) => inSet && !isArtPoint ? 1.0 : 0.0);
-        let chiselPoint = chooseRandomPoint(width, height, weights)
+        let chiselPoint = chooseRandomPoint(width, height, weights, random)
         console.log(chiselPoint)
         if (chiselPoint === null) {
             break;
