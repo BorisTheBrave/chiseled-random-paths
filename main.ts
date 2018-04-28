@@ -46,8 +46,8 @@ function findArticulationPoints(width: number, height: number, walkable: boolean
             if (unvisited)
             {
                 let [_, childRelevantSubtree] = cutvertex(vx, vy);
+                childCount++;
                 if(childRelevantSubtree) {
-                    childCount++;
                     isRelevantSubtree = true;
                 }
                 if (low[vx][vy] >= dfsNum[ux][uy]) {
@@ -76,6 +76,150 @@ function findArticulationPoints(width: number, height: number, walkable: boolean
     // No relevant points, or no walkable points
     return isArticulation;
 }
+
+function chooseRandom(weights: number[]): number | null 
+{
+    let totalWeight = 0;
+    for (let i=0; i < weights.length; i++) {
+        totalWeight += weights[i]
+    }
+    if (totalWeight <= 0)
+        return null;
+    let r = Math.random() * totalWeight;
+    // Could do binary search here
+    for (let i=0; i < weights.length; i++) {
+        r -= weights[i]
+        if(r < 0)
+            return i;
+    }
+    // Unreachable
+    throw new Error("Failed to choose a random point")
+}
+
+function chooseRandomPoint(width: number, height: number, weights: number[][]): [number, number] | null
+{
+    let linearWeights = [];
+    for (let x=0; x < width; x++) {
+        for (let y=0; y < height; y++) {
+            linearWeights.push(weights[x][y]);
+        }
+    }
+    let i = chooseRandom(linearWeights);
+    if (i === null)
+        return null;
+    return [Math.floor(i / height), i % height];
+}
+
+function map2D<U, R>(width: number, height: number, values: U[][], f: (value: U) => R): R[][] 
+{
+    let results: R[][] = [];
+    for (let x=0; x < width; x++) {
+        results[x] = values[x].map(f);
+    }
+    return results;
+}
+
+function zipMap2D<U, V, R>(width: number, height: number, values1: U[][], values2: V[][], f: (value1: U, value2:V) => R): R[][] 
+{
+    let results: R[][] = [];
+    for (let x=0; x < width; x++) {
+        results[x] = [];
+        for (let y=0; y < height; y++) {
+            results[x][y] = f(values1[x][y], values2[x][y])
+        }
+    }
+    return results;
+}
+
+/**
+ * Returns a random minimal subset of walkable that is a connected set containing all of points.
+ */
+function randomPath(width: number, height: number, walkable: boolean[][], points: boolean[][]): boolean[][]
+{
+    let path: boolean[][] = [];
+    for (let x=0; x < width; x++) {
+        path[x] = new Array(width);
+        for (let y=0; y < height; y++) {
+            path[x][y] = walkable[x][y];
+        }
+    }
+    while(true) {
+        let artPoints = findArticulationPoints(width, height, path, points);
+        let weights = zipMap2D(width, height, path, artPoints, (isPath, isArtPoint) => path && !isArtPoint ? 1.0 : 0.0);
+        let chiselPoint = chooseRandomPoint(width, height, weights)
+        if (chiselPoint === null) {
+            break;
+        }else{
+            let [x, y] = chiselPoint;
+            path[x][y] = false;
+        }
+    }
+    return path;
+}
+
+/**
+ * Returns a random connected subset of walkable with the given size.
+ */
+function randomConnectedSet(width: number, height: number, walkable: boolean[][], count: number)
+{
+    let set: boolean[][] = [];
+    let setCount = 0;
+    for (let x=0; x < width; x++) {
+        set[x] = new Array(width);
+        for (let y=0; y < height; y++) {
+            set[x][y] = walkable[x][y];
+            if (walkable[x][y]) setCount++;
+        }
+    }
+    while(setCount > count) {
+        let artPoints = findArticulationPoints(width, height, set);
+        let weights = zipMap2D(width, height, set, artPoints, (inSet, isArtPoint) => inSet && !isArtPoint ? 1.0 : 0.0);
+        let chiselPoint = chooseRandomPoint(width, height, weights)
+        console.log(chiselPoint)
+        if (chiselPoint === null) {
+            break;
+        }else{
+            let [x, y] = chiselPoint;
+            set[x][y] = false;
+            setCount--;
+        }
+    }
+    return set;
+}
+console.log(findArticulationPoints(
+    3,
+    3,
+    [
+        [true, true, true],
+        [true, false, false],
+        [true, false, false]
+    ]
+))
+console.log(randomConnectedSet(
+    3,
+    3,
+    [
+        [true, true, true],
+        [true, false, true],
+        [true, true, true]
+    ],
+    4))
+/*
+console.log(randomPath(
+    3,
+    3,
+    [
+        [true, true, true],
+        [true, false, true],
+        [true, true, true]
+    ],
+    [
+        [false, false, true],
+        [false, false, false],
+        [true, false, false]
+    ]))
+    */
+/*
 console.log(findArticulationPoints(
     3,
     3,
@@ -108,7 +252,7 @@ console.log(findArticulationPoints(
         [true, false, false]
     ],
 ))
-
+*/
 
 
 
