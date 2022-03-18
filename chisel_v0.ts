@@ -1,3 +1,8 @@
+// This file contains the old code descibred in
+// https://www.boristhebrave.com/2018/04/28/random-paths-via-chiseling/
+// For sake of posterity.
+// You are recommended to use chisel.ts for practical purposes.
+
 let neighbours = [
     [1, 0],
     [0, 1],
@@ -135,7 +140,7 @@ function zipMap2D<U, V, R>(width: number, height: number, values1: U[][], values
 /**
  * Returns a random minimal subset of walkable that is a connected set containing all of points.
  */
-function randomPath(width: number, height: number, walkable: boolean[][], points: boolean[][], random?: () => number): boolean[][]
+function randomPathv0(width: number, height: number, walkable: boolean[][], points: boolean[][], random?: () => number): boolean[][]
 {
     let path: boolean[][] = [];
     for (let x=0; x < width; x++) {

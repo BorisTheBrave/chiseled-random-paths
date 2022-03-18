@@ -39,25 +39,9 @@ function setupDemo2(imagePath: string)
     let tileSize = 32;
     let width = 20;
     let height = 20;
-    let exits: boolean[][] = [];
-    for(let x=0;x<width;x++)
-    {
-        exits[x] = [];
-        for(let y=0;y<height;y++) 
-        {
-            exits[x][y] = false;
-        }
-        
-    }
-    exits[3][3] = true;
-    exits[width-4][height-4] = true;
 
     function redraw()
     {
-        let count = countInput.valueAsNumber;
-        let endpoints = endpointsInput.checked;
-        countSpan.hidden = endpoints;
-
         // Recompute path
         let walkable: boolean[][] = [];
         for(let x=0;x<width;x++)
@@ -66,11 +50,11 @@ function setupDemo2(imagePath: string)
             for(let y=0;y<height;y++)
                 walkable[x][y] = true;
         }
-        if (endpoints)
+        let path = randomPath(width, height, {x:1,y:1}, {x:width-2,y:height-2}, 1);
+        for(let x=0;x<width;x++)
         {
-            walkable = randomPath(width, height, walkable, exits)
-        } else {
-            walkable = randomConnectedSet(width, height, walkable, count)
+            for(let y=0;y<height;y++)
+                walkable[x][y] = path.contains({x,y});;
         }
 
         regenPerlin();
@@ -138,11 +122,6 @@ function setupDemo2(imagePath: string)
                     }
                 }
             }
-            if(endpoints && exits[x][y])
-            {
-                let h = tileSize / 2;
-                ctx.drawImage(sign, 0, 0, h, h, x * tileSize + margin + h / 2, y * tileSize + margin + h / 2, h, h);
-            }
         }
     }
 
@@ -153,10 +132,6 @@ function setupDemo2(imagePath: string)
         let y = Math.floor((event.offsetY - margin)/tileSize);
         if(x >= 0 && x < width && y >= 0 && y < width)
         {
-            let endpoints = endpointsInput.checked;
-            if (endpoints) {
-                exits[x][y] = !exits[x][y];
-            }
             redraw();
         }
     }
