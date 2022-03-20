@@ -1,11 +1,8 @@
 function setupDemo2(imagePath: string)
 {
     // Setup form
-    let endpointsInput = <HTMLInputElement>document.getElementById('endpoints');
-    let countInput = <HTMLInputElement>document.getElementById('count');
-    let countSpan = <HTMLElement>document.getElementById('countSpan');
-    endpointsInput.onchange = () => redraw();
-    countInput.oninput = () => { redraw(); return false;}
+    let wigglinessInput = <HTMLElement>document.getElementById('wiggliness');
+    wigglinessInput.onchange = () => redraw();
     // Setup canvas
     let canvas = <HTMLCanvasElement>document.getElementById('canvas');
     let ctx = canvas.getContext("2d");
@@ -43,6 +40,7 @@ function setupDemo2(imagePath: string)
     function redraw()
     {
         // Recompute path
+        const wiggliness = wigglinessInput.value / 100;
         let walkable: boolean[][] = [];
         for(let x=0;x<width;x++)
         {
@@ -50,7 +48,7 @@ function setupDemo2(imagePath: string)
             for(let y=0;y<height;y++)
                 walkable[x][y] = true;
         }
-        let path = randomPath(width, height, {x:1,y:1}, {x:width-2,y:height-2}, 1);
+        let path = randomPath(width, height, {x:1,y:1}, {x:width-2,y:height-2}, wiggliness);
         for(let x=0;x<width;x++)
         {
             for(let y=0;y<height;y++)

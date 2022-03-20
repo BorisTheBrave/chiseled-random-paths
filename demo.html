@@ -4,10 +4,7 @@
     <script src="chisel.js"></script>
     <script src="demo.js"></script>
     <br/>
-    <input id="endpoints" type="checkbox" checked="true">Use fixed path endpoints (click on map to place)</input><br/>
-    <span id="countSpan">
-        <input id="count" type="number" value="150" step="10"> Number of path tiles
-    </span><br/>
+    <input type="range" min="0" max="200" value="100" class="slider" id="wiggliness">Wiggliness<br/>
     <a onclick="demo.redraw(); return false;" href="#">Generate a new path</a><br/>
     <small>(all tile graphics are made by <a href="http://zfgc.com/forum/index.php?topic=41500.0">fictionaldogs of ZFGC</a>)</small><br/>
     <script>var demo = setupDemo2("");</script>
