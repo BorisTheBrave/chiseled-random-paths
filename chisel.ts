@@ -171,3 +171,55 @@ function randomPath(width: number, height: number, from: Cell, to: Cell, wigglin
         }
     }
 }
+
+function* randomPathAnimated(width: number, height: number, from: Cell, to: Cell, wiggliness: number = 1)  {
+    const cellStates: CellState[][] = [];
+    const openCells: CellSet = new CellSet();
+
+    // Initialization
+    for (let x=0; x < width; x++) {
+        cellStates[x] = [];
+        for (let y = 0; y < height; y++) {
+            openCells.add({x,y});
+            cellStates[x][y] = CellState.Open;
+        }
+    }
+    openCells.remove(from);
+    openCells.remove(to);
+    cellStates[from.x][from.y] = CellState.Forced;
+    cellStates[to.x][to.y] = CellState.Forced;
+
+    function find_path(): CellSet | null {
+        return findPath(width, height, from, to, cellStates);
+    }
+    // Main algorithm
+    let witness = find_path();
+    while (true) {
+        yield {cellStates, witness};
+        // Exit if no Open cells remaining
+        if (openCells.cells.length === 0) {
+            yield {cellStates, witness};
+            //return witness;
+        }
+        // Pick a random Open cell
+        let c;
+        if (wiggliness == 1) {
+            c = randomCell(openCells.cells);
+        } else {
+            c = weightedRandomOpenCell(openCells, witness, wiggliness);
+        }
+        // Set c to Blocked
+        cellStates[c.x][c.y] = CellState.Blocked;
+        openCells.remove(c);
+        
+        if (witness.contains(c)){
+            const newPath = find_path();
+            if (newPath === null) {
+                // Set c to Forced
+                cellStates[c.x][c.y] = CellState.Forced;
+            } else {
+                witness = newPath;
+            }
+        }
+    }
+}

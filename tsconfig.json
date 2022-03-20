@@ -5,7 +5,8 @@
         "removeComments": false,
         "preserveConstEnums": true,
         "outDir": ".",
-        "sourceMap": true
+        "sourceMap": true,
+        "target": "ES6"
     },
     "include": [
         "*.ts"

@@ -1,8 +1,11 @@
 function setupDemo2(imagePath: string)
 {
     // Setup form
-    let wigglinessInput = <HTMLElement>document.getElementById('wiggliness');
+    let wigglinessInput = <HTMLInputElement>document.getElementById('wiggliness');
     wigglinessInput.onchange = () => redraw();
+    let animateInput = <HTMLInputElement>document.getElementById('animate');
+    animateInput.onchange = () => redraw();
+
     // Setup canvas
     let canvas = <HTMLCanvasElement>document.getElementById('canvas');
     let ctx = canvas.getContext("2d");
@@ -37,26 +40,73 @@ function setupDemo2(imagePath: string)
     let width = 20;
     let height = 20;
 
-    function redraw()
+    let walkable: boolean[][] = [];
+    let interval: number;
+
+    function redraw() {
+        clearInterval(interval);
+        if(animateInput.checked) {
+            redrawAnimated();
+        }else{
+            redrawOnce();
+        }
+    }
+
+    function redrawAnimated() {
+        const wiggliness = wigglinessInput.valueAsNumber / 100;
+        let g = randomPathAnimated(width, height, {x:1,y:1}, {x:width-2,y:height-2}, wiggliness);
+        interval = setInterval(() => {
+            let {done, value} = g.next();
+            if(done) clearInterval(interval);
+
+            if(!value)
+                return;
+
+            console.log(value);
+
+            // Draw
+            ctx.fillStyle = "#000000";
+            ctx.fillRect(margin, margin, tileSize * width, tileSize * height);
+            for(let x=0;x<width;x++)
+            for(let y=0;y<height;y++)
+            {
+                var c = {x,y};
+                let color;
+                let cellState = value.cellStates[x][y];
+                if(cellState == CellState.Blocked) {
+                    color = "black";
+                }else if(cellState == CellState.Forced) {
+                    color = "green";
+                } else if(value.witness.contains(c)) {
+                    color="lightgreen";
+                }else{
+                    color="grey";
+                }
+                ctx.fillStyle = color;
+                ctx.fillRect(x * tileSize + margin + 0, y * tileSize + margin + 0, tileSize, tileSize);
+            }
+
+        }, 100);
+    }
+
+    function redrawOnce()
     {
         // Recompute path
-        const wiggliness = wigglinessInput.value / 100;
-        let walkable: boolean[][] = [];
-        for(let x=0;x<width;x++)
-        {
-            walkable[x] = [];
-            for(let y=0;y<height;y++)
-                walkable[x][y] = true;
-        }
+        const wiggliness = wigglinessInput.valueAsNumber / 100;
         let path = randomPath(width, height, {x:1,y:1}, {x:width-2,y:height-2}, wiggliness);
         for(let x=0;x<width;x++)
         {
+            walkable[x] = [];
             for(let y=0;y<height;y++)
                 walkable[x][y] = path.contains({x,y});;
         }
 
         regenPerlin();
+        doDraw();
+    }
 
+    function doDraw()
+    {
         // Draw everything
         ctx.fillStyle = "#000000";
         ctx.fillRect(margin, margin, tileSize * width, tileSize * height);
