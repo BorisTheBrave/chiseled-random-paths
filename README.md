@@ -1,14 +1,16 @@
 Chiseled Random Paths
 =====================
 
-This code generates a random path between a given set of points. 
+This code generates a random path between a given set of points. Unlike most random path routines, the paths can organically wiggle back and forther.
 
-An explanation and demo can be found at https://www.boristhebrave.com/2018/04/28/random-paths-via-chiseling/.
+An explanation and demo can be found at https://www.boristhebrave.com/2022/03/20/chiseled-paths-revisited/.
+
+The algorithm has gone through several iteratios, you can find some older versions in `chisel_v0.ts`.
 
 Usage
 -----
 
-See the usage in `demo.ts`, or the comments. The two functions of interest are `randomPath` and `randomConnectedSet`, which find a path connecting specific points, and a path of a given size, respectively.
+See the usage in `demo.ts`, or the comments. The function of interest is `randomPath`, which find a path connecting specific points.
 
 Copyright
 ---------
